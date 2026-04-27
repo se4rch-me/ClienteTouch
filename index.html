@@ -265,7 +265,7 @@
         // ========================================
         // CONFIGURACIÓN CRÍTICA
         // ========================================
-        const ENDPOINT_URL = "https://script.google.com/macros/s/https://script.google.com/macros/s/AKfycbzNLsRyTY398Bq00tpJaB5wmmB0W9csYCW1X8VrWTTxc4Or8g9WKmIbeoN1YqCvnyCT2A/exec";
+        const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbzNLsRyTY398Bq00tpJaB5wmmB0W9csYCW1X8VrWTTxc4Or8g9WKmIbeoN1YqCvnyCT2A/exec";
         const FORM_SECRET_TOKEN = "sk_live_4d7a9f2e8c1b5h9k3m7p2q8r5t9w2y4z"; // ⚠️ DEBE COINCIDIR CON FormRecepcion.gs
 
         // ========================================
@@ -398,7 +398,7 @@
                 const response = await fetch(ENDPOINT_URL, {
                     method: "POST",
                     headers: {
-                        "Content-Type": "text/plain;charset=utf-8"
+                        "Content-Type": "application/json"
                     },
                     body: JSON.stringify(payload),
                     mode: 'cors'
