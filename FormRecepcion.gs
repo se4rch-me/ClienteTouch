@@ -2,14 +2,38 @@
  * ARCHIVO: FormRecepcion.gs
  * ENDPOINT SEGURO: Recepción de formularios desde GitHub Pages
  * Objetivo: Recibir datos del formulario web y crear PRE-INGRESO en Sheets
- * Versión: 2.0 - Con CORS configurado correctamente
+ * Versión: 2.1 - Completo con variables del Sheets
  */
 
-// === 1. CONFIGURACIÓN CRÍTICA ===
-const GITHUB_PAGES_DOMAIN = "se4rch-me.github.io"; // ⚠️ TU DOMINIO ACTUAL
+// === 1. CONFIGURACIÓN DEL ENDPOINT ===
+const GITHUB_PAGES_DOMAIN = "se4rch-me.github.io";
 const FORM_SECRET_TOKEN = "tu_token_secreto_aqui"; // ⚠️ CAMBIA ESTO A UN VALOR ÚNICO
-const MAX_REQUEST_SIZE = 1024; // Máximo 1KB por solicitud
-const RATE_LIMIT = 60; // 1 solicitud por minuto por IP
+const MAX_REQUEST_SIZE = 1024;
+const RATE_LIMIT = 60;
+
+// === 2. CONFIGURACIÓN DEL SPREADSHEET ===
+// ⚠️ COPIA ESTOS VALORES DE TU config.gs ORIGINAL
+const SPREADSHEET_ID = "19cwOCoRBH8V5j_Jgivha511EG2JcykDxweI4Ij4XKAQ";
+const SHEET_NAME = "TCK";
+
+const COLUMNS = {
+  LEAD_ID: 0,       
+  DATE_ADDED: 1,
+  STATUS: 2,
+  CLIENT_NAME: 3,
+  CEDULA_NIT: 4,
+  CONTACT: 5,
+  CORREO: 6,
+  DIRECCION: 7,
+  EQUIPO: 8,
+  INGRESO: 9,
+  PASSWORD: 10,
+  NOTA_CLIENTE: 11
+};
+
+const STATUS_OBJ = {
+  PRE_INGRESO: "PRE-INGRESO"
+};
 
 // Validadores
 const VALIDATORS = {
@@ -179,7 +203,7 @@ function doPost(e) {
     // GRUPO 1: Control
     newRow[COLUMNS.LEAD_ID] = tempId;
     newRow[COLUMNS.DATE_ADDED] = new Date().toLocaleDateString('es-CO');
-    newRow[COLUMNS.STATUS] = STATUS.PRE_INGRESO;
+    newRow[COLUMNS.STATUS] = STATUS_OBJ.PRE_INGRESO;
 
     // GRUPO 2: Cliente
     newRow[COLUMNS.CLIENT_NAME] = datos.nombre;
