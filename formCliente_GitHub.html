@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Touch Center - Registro de Ingreso</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f1f5f9;
+            color: #1e293b;
+            -webkit-tap-highlight-color: transparent;
+            min-height: 100dvh;
+            overflow-y: auto;
+        }
+
+        .step-content { display: none; }
+        .step-content.active { display: block; animation: slideUp 0.4s cubic-bezier(0, 0, 0.2, 1); }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            font-size: 16px; 
+            outline: none;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .input-field:focus { 
+            border-color: #3b82f6; 
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.08);
+        }
+
+        .device-card {
+            padding: 1rem 0.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 1.25rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .device-card svg { width: 28px; height: 28px; stroke: #94a3b8; transition: stroke 0.3s; }
+
+        .device-card.selected {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .device-card.selected svg { stroke: #3b82f6; }
+        .device-card.selected span { color: #2563eb; font-weight: 600; }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            transition: transform 0.1s, box-shadow 0.2s;
+        }
+        .btn-primary:active { transform: scale(0.98); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        #stepper .step-bar {
+            height: 6px;
+            flex: 1;
+            border-radius: 99px;
+            background-color: #e2e8f0;
+            transition: background-color 0.4s;
+        }
+        #stepper .step-bar.active { background-color: #2563eb; }
+
+        .alert-box {
+            padding: 1rem;
+            border-radius: 1rem;
+            margin-bottom: 1.5rem;
+            display: none;
+            font-size: 14px;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .alert-box.show { display: block; }
+        .alert-box.success { 
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        .alert-box.error {
+            background-color: #fee2e2;
+            color: #7f1d1d;
+            border: 1px solid #fca5a5;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-6 lg:p-10">
+
+    <div class="max-w-xl mx-auto bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/60 p-6 md:p-10 border border-slate-50">
+        
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-xl font-bold tracking-tight text-slate-800 flex items-center gap-2">
+                    <span class="w-2 h-8 bg-blue-600 rounded-full"></span>
+                    TOUCH CENTER
+                </h1>
+                <p class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mt-1">Auto-Registro Web</p>
+            </div>
+            <div class="bg-slate-50 border border-slate-100 px-4 py-2 rounded-2xl text-right">
+                <span class="text-[9px] font-bold text-slate-400 block uppercase">CLIENTE</span>
+                <span class="text-lg font-bold text-slate-700">AUTO-REGISTRO</span>
+            </div>
+        </div>
+
+        <div class="flex gap-2 mb-10" id="stepper">
+            <div class="step-bar active"></div>
+            <div class="step-bar"></div>
+            <div class="step-bar"></div>
+        </div>
+
+        <div id="alertBox" class="alert-box"></div>
+
+        <form id="mainForm">
+            
+            <div class="step-content active" id="step-1">
+                <h2 class="text-lg font-bold mb-5 text-slate-800 tracking-tight">Datos del Propietario</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase mb-1.5 block px-1 tracking-wider">Nombre Completo <span class="text-red-500">*</span></label>
+                        <input type="text" id="nombre" class="input-field" placeholder="Nombre y Apellidos">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-500 uppercase mb-1.5 block px-1 tracking-wider">NIT / Cédula <span class="text-red-500">*</span></label>
+                            <input type="text" id="id_cliente" class="input-field" placeholder="Documento" inputmode="numeric" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-500 uppercase mb-1.5 block px-1 tracking-wider">Teléfono / Celular <span class="text-red-500">*</span></label>
+                            <input type="tel" id="telefono" class="input-field" placeholder="3XX XXXXXXX" inputmode="numeric" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase mb-1.5 block px-1 tracking-wider">Correo Electrónico <span class="text-red-500">*</span></label>
+                        <input type="email" id="email" class="input-field" placeholder="ejemplo@correo.com">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase mb-1.5 block px-1 tracking-wider">Dirección de Domicilio <span class="text-red-500">*</span></label>
+                        <input type="text" id="direccion" class="input-field" placeholder="Calle / Carrera / Apto">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase mb-1.5 block px-1 tracking-wider">Nota Adicional del Cliente (Opcional)</label>
+                        <input type="text" id="nota_cliente" class="input-field" placeholder="El dispositivo ya ha sido manipulado.">
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-content" id="step-2">
+                <h2 class="text-lg font-bold mb-5 text-slate-800 tracking-tight">Tipo de Dispositivo</h2>
+                
+                <div class="grid grid-cols-3 gap-3 mb-3">
+                    <div class="device-card selected" onclick="selectDevice('macbook', this)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M2 17h20v2a2 2 0 01-2 2H4a2 2 0 01-2-2v-2z"/></svg>
+                        <span class="text-[10px] uppercase font-bold tracking-tight">MacBook</span>
+                    </div>
+                    <div class="device-card" onclick="selectDevice('imac', this)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><rect x="3" y="3" width="18" height="13" rx="2"/><path d="M8 21h8"/><path d="M12 16v5"/></svg>
+                        <span class="text-[10px] uppercase font-bold tracking-tight">iMac</span>
+                    </div>
+                    <div class="device-card" onclick="selectDevice('iphone', this)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+                        <span class="text-[10px] uppercase font-bold tracking-tight">iPhone</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mb-8">
+                    <div class="device-card" onclick="selectDevice('ipad', this)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                        <span class="text-[10px] uppercase font-bold tracking-tight">iPad</span>
+                    </div>
+                    <div class="device-card" onclick="selectDevice('otros', this)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+                        <span class="text-[10px] uppercase font-bold tracking-tight">Otros</span>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase mb-1.5 block px-1 tracking-wider">¿Qué falla presenta? <span class="text-red-500">*</span></label>
+                        <textarea id="falla" class="input-field h-24 resize-none" placeholder="Describe brevemente la necesidad o el problema..."></textarea>
+                    </div>
+                    <div id="container-clave">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase mb-1.5 block px-1 tracking-wider">Clave / PIN de Desbloqueo <span class="text-red-500">*</span></label>
+                        <input type="text" id="clave" class="input-field" placeholder="(Necesaria para pruebas de software)">
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-content" id="step-3">
+                <h2 class="text-lg font-bold mb-5 text-slate-800 tracking-tight">Detalles de Entrega</h2>
+                <div class="space-y-6">
+                    
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase mb-2 block px-1 tracking-wider">¿Dejas accesorios con el equipo?</label>
+                        <div class="flex gap-3 mb-3">
+                            <label class="flex-1 cursor-pointer">
+                                <input type="radio" name="has_acc" value="no" class="peer sr-only" checked onchange="toggleAccesorios(false)">
+                                <div class="text-center py-2.5 rounded-xl border border-slate-200 peer-checked:bg-blue-50 peer-checked:border-blue-500 peer-checked:text-blue-700 font-semibold transition-all text-sm">No</div>
+                            </label>
+                            <label class="flex-1 cursor-pointer">
+                                <input type="radio" name="has_acc" value="si" class="peer sr-only" onchange="toggleAccesorios(true)">
+                                <div class="text-center py-2.5 rounded-xl border border-slate-200 peer-checked:bg-blue-50 peer-checked:border-blue-500 peer-checked:text-blue-700 font-semibold transition-all text-sm">Sí</div>
+                            </label>
+                        </div>
+                        <textarea id="accesorios" class="input-field h-20 resize-none hidden" placeholder="Ej: Cargador original, funda protectora..."></textarea>
+                    </div>
+
+                    <div class="bg-blue-50/50 p-4 rounded-2xl border border-blue-100/50">
+                        <p class="text-[11px] text-blue-700 leading-snug">
+                            <strong class="block mb-1">Nota Importante:</strong>
+                            Al registrarse, usted acepta que el equipo sea sometido a diagnóstico técnico inicial. Touch Center garantiza la privacidad de su información.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 flex gap-3">
+                <button type="button" id="prevBtn" onclick="move(-1)" class="hidden flex-1 py-4 font-bold text-slate-400 bg-slate-100 rounded-2xl hover:bg-slate-200 transition-colors">ATRAS</button>
+                <button type="button" id="nextBtn" onclick="move(1)" class="btn-primary flex-[2] py-4 font-bold text-white rounded-2xl shadow-lg shadow-blue-500/20">CONTINUAR</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // ========================================
+        // CONFIGURACIÓN CRÍTICA
+        // ========================================
+        const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbzNLsRyTY398Bq00tpJaB5wmmB0W9csYCW1X8VrWTTxc4Or8g9WKmIbeoN1YqCvnyCT2A/exec";
+        const FORM_SECRET_TOKEN = "sk_live_4d7a9f2e8c1b5h9k3m7p2q8r5t9w2y4z"; 
+
+        // ========================================
+        // LÓGICA DEL FORMULARIO
+        // ========================================
+        document.addEventListener("DOMContentLoaded", function() {
+            const inputs = document.querySelectorAll('input, textarea');
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    setTimeout(() => {
+                        this.scrollIntoView({ 
+                            behavior: "smooth", 
+                            block: "center" 
+                        });
+                    }, 300);
+                });
+            });
+        });
+
+        let current = 1;
+        const total = 3;
+        let selectedType = 'macbook';
+
+        function selectDevice(type, el) {
+            selectedType = type;
+            document.querySelectorAll('.device-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            
+            const claveContainer = document.getElementById('container-clave');
+            if(type === 'otros') {
+                claveContainer.classList.add('hidden');
+                document.getElementById('clave').value = 'N/A';
+            } else {
+                claveContainer.classList.remove('hidden');
+                if(document.getElementById('clave').value === 'N/A') {
+                    document.getElementById('clave').value = '';
+                }
+            }
+        }
+
+        function toggleAccesorios(show) {
+            const box = document.getElementById('accesorios');
+            if (show) {
+                box.classList.remove('hidden');
+                box.focus();
+            } else {
+                box.classList.add('hidden');
+                box.value = '';
+            }
+        }
+
+        function move(dir) {
+            if (current + dir < 1 || current + dir > total) {
+                if(current === 3 && dir === 1) submitForm();
+                return;
+            }
+
+            document.getElementById(`step-${current}`).classList.remove('active');
+            current += dir;
+            document.getElementById(`step-${current}`).classList.add('active');
+
+            const bars = document.querySelectorAll('#stepper div');
+            bars.forEach((bar, i) => {
+                bar.className = `step-bar ${i < current ? 'active' : ''}`;
+            });
+
+            document.getElementById('prevBtn').classList.toggle('hidden', current === 1);
+            const btn = document.getElementById('nextBtn');
+            btn.innerText = current === total ? 'FINALIZAR REGISTRO' : 'CONTINUAR';
+        }
+
+        function showAlert(message, type) {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.className = `alert-box show ${type}`;
+            alertBox.innerHTML = message;
+            alertBox.scrollIntoView({ behavior: "smooth" });
+        }
+
+        async function submitForm() {
+            // 1. Validaciones dinámicas
+            const camposObligatorios = ['nombre', 'id_cliente', 'telefono', 'email', 'direccion', 'falla'];
+            
+            if(selectedType !== 'otros') {
+                camposObligatorios.push('clave');
+            }
+
+            let vacio = false;
+            camposObligatorios.forEach(id => {
+                if(!document.getElementById(id).value.trim()) vacio = true;
+            });
+
+            if(vacio) {
+                showAlert("⚠️ Por favor completa los campos obligatorios marcados con asterisco (*) para continuar.", "error");
+                return;
+            }
+
+            // 2. Cambiar estado del botón
+            const btn = document.getElementById('nextBtn');
+            const btnText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner"></span>Procesando...`;
+            document.getElementById('prevBtn').disabled = true;
+            
+            try {
+                // 3. Preparar accesorios
+                const dejoAccesorios = document.querySelector('input[name="has_acc"][value="si"]').checked;
+                const accesoriosTexto = dejoAccesorios ? (document.getElementById('accesorios').value.trim() || "Sí (Sin especificar)") : "Ninguno";
+
+                // 4. Recopilar datos
+                const datosCliente = {
+                    nombre: document.getElementById('nombre').value.trim(),
+                    id_cliente: document.getElementById('id_cliente').value.trim(),
+                    telefono: document.getElementById('telefono').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    direccion: document.getElementById('direccion').value.trim(),
+                    nota_cliente: document.getElementById('nota_cliente').value.trim() || "",
+                    equipo: selectedType.toUpperCase(),
+                    falla: document.getElementById('falla').value.trim(),
+                    clave: document.getElementById('clave').value.trim(),
+                    accesorios: accesoriosTexto
+                };
+
+                // 5. Construir payload con token
+                const payload = {
+                    token: FORM_SECRET_TOKEN,
+                    datos: datosCliente
+                };
+
+                // 6. Enviar al endpoint
+                const response = await fetch(ENDPOINT_URL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert(`✅ ¡Registro enviado con éxito!<br><br>ID de seguimiento: <strong>${result.tempId}</strong><br><br>Por favor entrega el equipo al personal de Touch Center para finalizar el ingreso.`, "success");
+                    
+                    // Limpiar formulario
+                    document.getElementById('mainForm').reset();
+                    toggleAccesorios(false);
+                    
+                    // Regresar al Paso 1
+                    current = 1;
+                    document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
+                    document.getElementById('step-1').classList.add('active');
+                    
+                    document.querySelectorAll('#stepper div').forEach((bar, i) => {
+                        bar.className = `step-bar ${i === 0 ? 'active' : ''}`;
+                    });
+                    
+                    document.querySelectorAll('.device-card').forEach(c => c.classList.remove('selected'));
+                    const firstCard = document.querySelector('.device-card');
+                    firstCard.classList.add('selected');
+                    selectDevice('macbook', firstCard);
+                    
+                    document.getElementById('prevBtn').classList.add('hidden');
+                    btn.disabled = false;
+                    btn.innerHTML = 'FINALIZAR REGISTRO';
+                    
+                } else {
+                    const detalles = result.detalles ? `<br>${result.detalles.map(d => `• ${d}`).join('<br>')}` : '';
+                    showAlert(`❌ ${result.error}${detalles}`, "error");
+                    btn.disabled = false;
+                    btn.innerHTML = btnText;
+                    document.getElementById('prevBtn').disabled = false;
+                }
+                
+            } catch (error) {
+                showAlert(`❌ Error de conexión: ${error.message}`, "error");
+                btn.disabled = false;
+                btn.innerHTML = btnText;
+                document.getElementById('prevBtn').disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
