@@ -30,7 +30,7 @@ const FORM_SECRET_TOKEN = "tu_token_secreto_aqui";
 
 **Cámbialo a algo único y largo:**
 ```javascript
-const FORM_SECRET_TOKEN = "sk_live_4d7a9f2e8c1b5h9k3m7p2q8r5t9w2y4z";
+const FORM_SECRET_TOKEN = "secret";
 ```
 
 **Este token DEBE estar en AMBOS lados:**
@@ -51,7 +51,7 @@ En `formCliente_GitHub.html`:
 
 **Línea 265** - Tu token secreto:
 ```javascript
-const FORM_SECRET_TOKEN = "sk_live_4d7a9f2e8c1b5h9k3m7p2q8r5t9w2y4z"; // IGUAL que en AppScript
+const FORM_SECRET_TOKEN = "secret"; // IGUAL que en AppScript
 ```
 
 **Línea 264** - Tu URL de deploy de AppScript:
