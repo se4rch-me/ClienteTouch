@@ -242,24 +242,24 @@ function doPost(e) {
 
 // === 6. RESPUESTA CON CORS HEADERS ===
 function responder(data, statusCode = 200) {
-  return ContentService
-    .createTextOutput(JSON.stringify(data))
-    .setMimeType(ContentService.MimeType.JSON)
-    .setHeader("Access-Control-Allow-Origin", "https://" + GITHUB_PAGES_DOMAIN)
-    .setHeader("Access-Control-Allow-Methods", "POST, OPTIONS")
-    .setHeader("Access-Control-Allow-Headers", "Content-Type")
-    .setHeader("Access-Control-Max-Age", "3600")
-    .setHeader("X-Content-Type-Options", "nosniff")
-    .setHeader("X-Frame-Options", "DENY");
+  var output = ContentService.createTextOutput(JSON.stringify(data));
+  output.setMimeType(ContentService.MimeType.JSON);
+  output.setHeader("Access-Control-Allow-Origin", "https://" + GITHUB_PAGES_DOMAIN);
+  output.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  output.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  output.setHeader("Access-Control-Max-Age", "3600");
+  output.setHeader("X-Content-Type-Options", "nosniff");
+  output.setHeader("X-Frame-Options", "DENY");
+  return output;
 }
 
 // === 7. MANEJO DE PREFLIGHT (OPTIONS) ===
 function doOptions(e) {
-  return ContentService
-    .createTextOutput("")
-    .setMimeType(ContentService.MimeType.TEXT)
-    .setHeader("Access-Control-Allow-Origin", "https://" + GITHUB_PAGES_DOMAIN)
-    .setHeader("Access-Control-Allow-Methods", "POST, OPTIONS")
-    .setHeader("Access-Control-Allow-Headers", "Content-Type")
-    .setHeader("Access-Control-Max-Age", "3600");
+  var output = ContentService.createTextOutput("");
+  output.setMimeType(ContentService.MimeType.TEXT);
+  output.setHeader("Access-Control-Allow-Origin", "https://" + GITHUB_PAGES_DOMAIN);
+  output.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  output.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  output.setHeader("Access-Control-Max-Age", "3600");
+  return output;
 }
